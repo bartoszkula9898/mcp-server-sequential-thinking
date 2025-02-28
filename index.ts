@@ -159,7 +159,9 @@ class SequentialThinkingServer {
       complexity,
       dependencies,
       toolsUsed,
-      promptAlignment
+      promptAlignment,
+      // Add new fields
+      intelligenceRecommendations
     } = thoughtData;
 
     let prefix = '';
@@ -231,6 +233,42 @@ class SequentialThinkingServer {
       thoughtData.suggestedCorrections.forEach(correction => {
         formattedThought += `\n  • ${correction}`;
       });
+    }
+    
+    // Add cognitive biases if available
+    if (intelligenceRecommendations && intelligenceRecommendations.cognitiveBiases && 
+        intelligenceRecommendations.cognitiveBiases.length > 0) {
+      formattedThought += '\n\nPotential Cognitive Biases:';
+      intelligenceRecommendations.cognitiveBiases
+        .sort((a, b) => b.likelihood - a.likelihood) // Sort by likelihood descending
+        .slice(0, 2) // Show only top 2 biases
+        .forEach(bias => {
+          formattedThought += `\n  • ${bias.biasType} (${Math.round(bias.likelihood * 10)}/10): ${bias.description}`;
+          formattedThought += `\n    Mitigation: ${bias.mitigationStrategy}`;
+        });
+    }
+    
+    // Add metacognitive strategies if available
+    if (intelligenceRecommendations && intelligenceRecommendations.metacognitiveStrategies && 
+        intelligenceRecommendations.metacognitiveStrategies.length > 0) {
+      formattedThought += '\n\nRecommended Thinking Strategies:';
+      intelligenceRecommendations.metacognitiveStrategies
+        .slice(0, 2) // Show only top 2 strategies
+        .forEach(strategy => {
+          formattedThought += `\n  • ${strategy.strategyName}: ${strategy.description}`;
+          formattedThought += `\n    Benefit: ${strategy.expectedBenefit}`;
+        });
+    }
+    
+    // Add insight prompts if available
+    if (intelligenceRecommendations && intelligenceRecommendations.insightGenerationPrompts && 
+        intelligenceRecommendations.insightGenerationPrompts.length > 0) {
+      formattedThought += '\n\nInsight Prompts:';
+      intelligenceRecommendations.insightGenerationPrompts
+        .slice(0, 2) // Show only top 2 prompts
+        .forEach(prompt => {
+          formattedThought += `\n  • ${prompt}`;
+        });
     }
     
     const border = '─'.repeat(Math.max(header.length, formattedThought.length) + 4);
@@ -388,6 +426,23 @@ class SequentialThinkingServer {
       // Add pitfall warning
       if (currentThought.intelligenceRecommendations.potentialPitfalls.length > 0) {
         guidance.push(`Watch out for: ${currentThought.intelligenceRecommendations.potentialPitfalls[0]}`);
+      }
+      
+      // Add adaptive suggestions
+      if (currentThought.intelligenceRecommendations.adaptiveSuggestions && 
+          currentThought.intelligenceRecommendations.adaptiveSuggestions.length > 0) {
+        guidance.push(...currentThought.intelligenceRecommendations.adaptiveSuggestions.slice(0, 2));
+      }
+      
+      // Add cognitive bias mitigation if high likelihood biases detected
+      if (currentThought.intelligenceRecommendations.cognitiveBiases && 
+          currentThought.intelligenceRecommendations.cognitiveBiases.length > 0) {
+        const highLikelihoodBias = currentThought.intelligenceRecommendations.cognitiveBiases
+          .find(bias => bias.likelihood > 0.7);
+        
+        if (highLikelihoodBias) {
+          guidance.push(`Be aware of potential ${highLikelihoodBias.biasType}: ${highLikelihoodBias.mitigationStrategy}`);
+        }
       }
     }
     
@@ -649,21 +704,26 @@ class SequentialThinkingServer {
             toolUsageStats: this.toolUsageStats,
             keywords: validatedInput.keywords,
             insightValue: validatedInput.insightValue,
-            // New analytics data
+            // Analytics data
             semanticAnalysis: {
               concepts: validatedInput.conceptsExtracted,
               contradictions: validatedInput.contradictions,
               assumptions: validatedInput.assumptions,
               reflectionPrompts: validatedInput.reflectionPrompts
             },
-            // New prompt alignment data
+            // Prompt alignment data
             promptAlignment: validatedInput.promptAlignment,
             promptRelevance: validatedInput.promptRelevance,
             driftWarning: validatedInput.driftWarning,
             suggestedCorrections: validatedInput.suggestedCorrections,
-            // New intelligence maximization data
+            // Intelligence maximization data
             intelligenceRecommendations: validatedInput.intelligenceRecommendations,
-            // New prompt progress data
+            // New intelligence features
+            cognitiveBiases: validatedInput.intelligenceRecommendations?.cognitiveBiases,
+            metacognitiveStrategies: validatedInput.intelligenceRecommendations?.metacognitiveStrategies,
+            adaptiveSuggestions: validatedInput.intelligenceRecommendations?.adaptiveSuggestions,
+            insightPrompts: validatedInput.intelligenceRecommendations?.insightGenerationPrompts,
+            // Prompt progress data
             promptProgress: this.promptContext.isInitialized() && this.promptContext.getMetadata() ? {
               overallProgress: this.calculateOverallProgress(),
               estimatedRemainingThoughts: this.estimateRemainingThoughts(),
