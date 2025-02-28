@@ -41,6 +41,22 @@ export interface ComplexityEstimation {
   };
 }
 
+// Cognitive bias detection
+export interface CognitiveBiasDetection {
+  biasType: string;
+  description: string;
+  likelihood: number; // 0-1 score
+  mitigationStrategy: string;
+}
+
+// Metacognitive strategy
+export interface MetacognitiveStrategy {
+  strategyName: string;
+  description: string;
+  applicability: number; // 0-10 score
+  expectedBenefit: string;
+}
+
 // Intelligence maximization recommendations
 export interface IntelligenceMaximizationRecommendations {
   strategies: StrategyRecommendation[];
@@ -49,6 +65,11 @@ export interface IntelligenceMaximizationRecommendations {
   toolRecommendations: string[];
   focusAreas: string[];
   potentialPitfalls: string[];
+  // New fields
+  cognitiveBiases: CognitiveBiasDetection[];
+  metacognitiveStrategies: MetacognitiveStrategy[];
+  adaptiveSuggestions: string[];
+  insightGenerationPrompts: string[];
 }
 
 export class IntelligenceMaximizationModule {
@@ -84,13 +105,23 @@ export class IntelligenceMaximizationModule {
     // Identify potential pitfalls
     const potentialPitfalls = this.identifyPotentialPitfalls(promptMetadata);
     
+    // New methods
+    const cognitiveBiases = this.detectPotentialCognitiveBiases(promptMetadata, phase);
+    const metacognitiveStrategies = this.recommendMetacognitiveStrategies(promptMetadata, currentThoughtNumber, totalThoughts);
+    const adaptiveSuggestions = this.generateAdaptiveSuggestions(promptMetadata, currentThoughtNumber, totalThoughts, phase);
+    const insightGenerationPrompts = this.generateInsightPrompts(promptMetadata, phase);
+    
     return {
       strategies,
       reasoningTypes,
       complexityEstimation,
       toolRecommendations,
       focusAreas,
-      potentialPitfalls
+      potentialPitfalls,
+      cognitiveBiases,
+      metacognitiveStrategies,
+      adaptiveSuggestions,
+      insightGenerationPrompts
     };
   }
 
@@ -305,6 +336,14 @@ export class IntelligenceMaximizationModule {
           applicability: 8,
           examples: ['Applying solutions from one domain to another', 'Using metaphors to generate insights']
         });
+        
+        // New reasoning type
+        recommendations.push({
+          reasoningType: 'divergent',
+          description: 'Explore multiple different directions to generate a variety of possibilities',
+          applicability: 8,
+          examples: ['Considering wildly different approaches', 'Suspending judgment to explore unusual ideas']
+        });
         break;
         
       case 'analytical':
@@ -321,6 +360,14 @@ export class IntelligenceMaximizationModule {
           applicability: 8,
           examples: ['Analyzing root causes', 'Predicting outcomes based on actions']
         });
+        
+        // New reasoning type
+        recommendations.push({
+          reasoningType: 'systems',
+          description: 'Analyze interactions between components in a complex system',
+          applicability: 8,
+          examples: ['Mapping feedback loops', 'Identifying emergent properties']
+        });
         break;
         
       case 'informational':
@@ -329,6 +376,14 @@ export class IntelligenceMaximizationModule {
           description: 'Draw general conclusions from specific observations',
           applicability: 9,
           examples: ['Identifying patterns from examples', 'Generalizing from specific cases']
+        });
+        
+        // New reasoning type
+        recommendations.push({
+          reasoningType: 'hierarchical',
+          description: 'Organize information in levels from general to specific',
+          applicability: 8,
+          examples: ['Creating taxonomies', 'Developing conceptual hierarchies']
         });
         break;
         
@@ -346,6 +401,14 @@ export class IntelligenceMaximizationModule {
           applicability: 8,
           examples: ['Debugging by tracing effects to causes', 'Predicting system behavior']
         });
+        
+        // New reasoning type
+        recommendations.push({
+          reasoningType: 'modular',
+          description: 'Break down complex systems into independent functional components',
+          applicability: 9,
+          examples: ['Designing with separation of concerns', 'Creating abstraction layers']
+        });
         break;
         
       case 'mixed':
@@ -354,6 +417,14 @@ export class IntelligenceMaximizationModule {
           description: 'Form the most likely explanation from incomplete information',
           applicability: 8,
           examples: ['Developing working hypotheses', 'Making educated guesses with limited data']
+        });
+        
+        // New reasoning type
+        recommendations.push({
+          reasoningType: 'integrative',
+          description: 'Combine insights from multiple reasoning approaches',
+          applicability: 9,
+          examples: ['Synthesizing analytical and creative thinking', 'Balancing quantitative and qualitative factors']
         });
         break;
     }
@@ -368,6 +439,14 @@ export class IntelligenceMaximizationModule {
             applicability: 7,
             examples: ['What if analysis', 'Considering edge cases']
           });
+          
+          // New reasoning type
+          recommendations.push({
+            reasoningType: 'strategic',
+            description: 'Focus on long-term goals and high-level approaches',
+            applicability: 8,
+            examples: ['Identifying key leverage points', 'Focusing on highest-impact areas']
+          });
           break;
           
         case 'Analysis':
@@ -379,6 +458,14 @@ export class IntelligenceMaximizationModule {
               examples: ['Root cause analysis', 'Impact assessment']
             });
           }
+          
+          // New reasoning type
+          recommendations.push({
+            reasoningType: 'comparative',
+            description: 'Analyze similarities and differences between options or scenarios',
+            applicability: 8,
+            examples: ['Side-by-side comparison', 'Evaluating trade-offs']
+          });
           break;
           
         case 'Execution':
@@ -390,6 +477,14 @@ export class IntelligenceMaximizationModule {
               examples: ['Following best practices', 'Applying domain principles']
             });
           }
+          
+          // New reasoning type
+          recommendations.push({
+            reasoningType: 'procedural',
+            description: 'Focus on step-by-step processes and implementation details',
+            applicability: 9,
+            examples: ['Creating action sequences', 'Defining workflows']
+          });
           break;
           
         case 'Verification':
@@ -399,12 +494,20 @@ export class IntelligenceMaximizationModule {
             applicability: 8,
             examples: ['Edge case testing', 'What-if analysis']
           });
+          
+          // New reasoning type
+          recommendations.push({
+            reasoningType: 'evaluative',
+            description: 'Assess solutions against explicit criteria and requirements',
+            applicability: 9,
+            examples: ['Systematic testing', 'Requirements validation']
+          });
           break;
       }
     }
     
-    // Return top reasoning types (limit to 2 to avoid overwhelming)
-    return recommendations.slice(0, 2);
+    // Return top reasoning types (limit to 3 to avoid overwhelming)
+    return recommendations.slice(0, 3);
   }
 
   /**
@@ -827,5 +930,312 @@ export class IntelligenceMaximizationModule {
     }
     
     return pitfalls;
+  }
+  /**
+   * Detects potential cognitive biases based on prompt type and phase
+   */
+  private detectPotentialCognitiveBiases(
+    promptMetadata: PromptMetadata,
+    phase?: 'Planning' | 'Analysis' | 'Execution' | 'Verification'
+  ): CognitiveBiasDetection[] {
+    const biases: CognitiveBiasDetection[] = [];
+    
+    // Add task-specific biases
+    switch (promptMetadata.taskType) {
+      case 'creative':
+        biases.push({
+          biasType: 'Novelty bias',
+          description: 'Favoring ideas that seem new over those that are effective',
+          likelihood: 0.7,
+          mitigationStrategy: 'Balance novelty with practicality by evaluating ideas against concrete criteria'
+        });
+        break;
+        
+      case 'analytical':
+        biases.push({
+          biasType: 'Confirmation bias',
+          description: 'Seeking information that confirms existing hypotheses',
+          likelihood: 0.8,
+          mitigationStrategy: 'Actively search for disconfirming evidence and alternative explanations'
+        });
+        break;
+        
+      case 'technical':
+        biases.push({
+          biasType: 'Sunk cost fallacy',
+          description: 'Continuing with an approach because of prior investment',
+          likelihood: 0.6,
+          mitigationStrategy: 'Evaluate approaches based on future utility, not past investment'
+        });
+        break;
+    }
+    
+    // Add phase-specific biases
+    if (phase) {
+      switch (phase) {
+        case 'Planning':
+          biases.push({
+            biasType: 'Planning fallacy',
+            description: 'Underestimating time and resources needed',
+            likelihood: 0.75,
+            mitigationStrategy: 'Add buffer time and consider past similar tasks as reference points'
+          });
+          break;
+          
+        case 'Analysis':
+          biases.push({
+            biasType: 'Anchoring bias',
+            description: 'Over-relying on first piece of information encountered',
+            likelihood: 0.65,
+            mitigationStrategy: 'Consider multiple starting points and diverse information sources'
+          });
+          break;
+          
+        case 'Execution':
+          biases.push({
+            biasType: 'Optimism bias',
+            description: 'Overestimating likelihood of positive outcomes',
+            likelihood: 0.7,
+            mitigationStrategy: 'Conduct pre-mortems to identify potential failure points'
+          });
+          break;
+          
+        case 'Verification':
+          biases.push({
+            biasType: 'Availability bias',
+            description: 'Judging quality based on easily recalled examples',
+            likelihood: 0.6,
+            mitigationStrategy: 'Use structured evaluation criteria rather than relying on memory'
+          });
+          break;
+      }
+    }
+    
+    // Add complexity-specific biases
+    if (promptMetadata.complexity === 'complex') {
+      biases.push({
+        biasType: 'Simplification bias',
+        description: 'Reducing complex problems to simpler models that miss key factors',
+        likelihood: 0.8,
+        mitigationStrategy: 'Explicitly map out interconnections and feedback loops'
+      });
+    }
+    
+    return biases;
+  }
+
+  /**
+   * Recommends metacognitive strategies to enhance thinking quality
+   */
+  private recommendMetacognitiveStrategies(
+    promptMetadata: PromptMetadata,
+    currentThoughtNumber: number,
+    totalThoughts: number
+  ): MetacognitiveStrategy[] {
+    const strategies: MetacognitiveStrategy[] = [];
+    const progress = currentThoughtNumber / totalThoughts;
+    
+    // General metacognitive strategies
+    strategies.push({
+      strategyName: 'Explicit assumption testing',
+      description: 'Identify and validate key assumptions underlying your thinking',
+      applicability: 8,
+      expectedBenefit: 'Reduces risk of building on faulty premises'
+    });
+    
+    strategies.push({
+      strategyName: 'Counterfactual thinking',
+      description: 'Consider what would happen if key facts or assumptions were different',
+      applicability: 7,
+      expectedBenefit: 'Reveals dependencies and alternative possibilities'
+    });
+    
+    // Progress-specific strategies
+    if (progress < 0.3) {
+      // Early stage
+      strategies.push({
+        strategyName: 'Problem reframing',
+        description: 'Describe the problem in multiple different ways to reveal new aspects',
+        applicability: 9,
+        expectedBenefit: 'Prevents premature narrowing of problem scope'
+      });
+    } else if (progress < 0.7) {
+      // Middle stage
+      strategies.push({
+        strategyName: 'Intermediate synthesis',
+        description: 'Periodically integrate insights from multiple thoughts into coherent models',
+        applicability: 9,
+        expectedBenefit: 'Prevents fragmentation of thinking across multiple thoughts'
+      });
+    } else {
+      // Late stage
+      strategies.push({
+        strategyName: 'Critical review',
+        description: 'Systematically evaluate the strength of your solution against requirements',
+        applicability: 9,
+        expectedBenefit: 'Identifies gaps before finalizing solution'
+      });
+    }
+    
+    // Task-specific strategies
+    switch (promptMetadata.taskType) {
+      case 'creative':
+        strategies.push({
+          strategyName: 'Constraint relaxation',
+          description: 'Temporarily ignore constraints to explore novel possibilities',
+          applicability: 8,
+          expectedBenefit: 'Generates innovative options that can be refined to meet constraints'
+        });
+        break;
+        
+      case 'analytical':
+        strategies.push({
+          strategyName: 'Multiple models analysis',
+          description: 'Apply different analytical frameworks to the same problem',
+          applicability: 8,
+          expectedBenefit: 'Reveals insights that any single model might miss'
+        });
+        break;
+        
+      case 'technical':
+        strategies.push({
+          strategyName: 'Edge case identification',
+          description: 'Systematically identify boundary conditions and exceptions',
+          applicability: 9,
+          expectedBenefit: 'Prevents failures in non-standard scenarios'
+        });
+        break;
+    }
+    
+    return strategies.slice(0, 3); // Return top 3 strategies
+  }
+
+  /**
+   * Generates adaptive suggestions based on current context
+   */
+  private generateAdaptiveSuggestions(
+    promptMetadata: PromptMetadata,
+    currentThoughtNumber: number,
+    totalThoughts: number,
+    phase?: 'Planning' | 'Analysis' | 'Execution' | 'Verification'
+  ): string[] {
+    const suggestions: string[] = [];
+    const progress = currentThoughtNumber / totalThoughts;
+    
+    // Progress-based suggestions
+    if (progress < 0.2) {
+      suggestions.push('Consider spending more time understanding the problem before diving into solutions');
+    } else if (progress > 0.8) {
+      suggestions.push('Begin synthesizing key insights from your thinking process');
+    }
+    
+    // Phase transition suggestions
+    if (phase === 'Planning' && progress > 0.3) {
+      suggestions.push('Consider transitioning from planning to analysis phase');
+    } else if (phase === 'Analysis' && progress > 0.5) {
+      suggestions.push('Consider moving from analysis to execution phase');
+    } else if (phase === 'Execution' && progress > 0.8) {
+      suggestions.push('Begin verification of your solution');
+    }
+    
+    // Complexity-based suggestions
+    if (promptMetadata.complexity === 'complex') {
+      suggestions.push('Break down complex aspects into manageable components');
+      suggestions.push('Regularly zoom out to maintain perspective on the overall problem');
+    }
+    
+    // Task-specific adaptive suggestions
+    switch (promptMetadata.taskType) {
+      case 'creative':
+        if (currentThoughtNumber > 3) {
+          suggestions.push('Consider combining elements from your previous thoughts in novel ways');
+        }
+        break;
+        
+      case 'analytical':
+        if (currentThoughtNumber > 3) {
+          suggestions.push('Look for patterns or contradictions across your previous analyses');
+        }
+        break;
+        
+      case 'technical':
+        suggestions.push('Consider both the implementation details and the user experience');
+        break;
+        
+      case 'informational':
+        suggestions.push('Ensure information is organized in a logical hierarchy');
+        break;
+    }
+    
+    return suggestions;
+  }
+
+  /**
+   * Generates prompts to stimulate insight generation
+   */
+  private generateInsightPrompts(
+    promptMetadata: PromptMetadata,
+    phase?: 'Planning' | 'Analysis' | 'Execution' | 'Verification'
+  ): string[] {
+    const prompts: string[] = [];
+    
+    // General insight prompts
+    prompts.push('What unexpected connections exist between different aspects of this problem?');
+    prompts.push('What would an expert in this domain notice that others might miss?');
+    
+    // Phase-specific prompts
+    if (phase) {
+      switch (phase) {
+        case 'Planning':
+          prompts.push('What hidden assumptions might be limiting your planning approach?');
+          prompts.push('What would a completely different planning approach look like?');
+          break;
+          
+        case 'Analysis':
+          prompts.push('What patterns or anomalies in the data haven't been explained yet?');
+          prompts.push('What would change if a key assumption in your analysis was incorrect?');
+          break;
+          
+        case 'Execution':
+          prompts.push('What elegant simplifications could make this solution more robust?');
+          prompts.push('What aspects of the implementation might create unexpected effects?');
+          break;
+          
+        case 'Verification':
+          prompts.push('What perspectives or criteria haven't been considered in verification?');
+          prompts.push('What would be the most surprising way this solution could fail?');
+          break;
+      }
+    }
+    
+    // Domain-specific prompts
+    if (promptMetadata.domains.length > 0) {
+      prompts.push(`How might principles from ${promptMetadata.domains[0]} be applied in unexpected ways?`);
+    }
+    
+    // Task-specific prompts
+    switch (promptMetadata.taskType) {
+      case 'creative':
+        prompts.push('What if you combined seemingly unrelated elements of this problem?');
+        prompts.push("How would you approach this if traditional constraints didn't apply?");
+        break;
+        
+      case 'analytical':
+        prompts.push("What alternative explanations haven't been considered yet?");
+        prompts.push("What meta-patterns exist across different analyses you've performed?");
+        break;
+        
+      case 'technical':
+        prompts.push('What elegant architectural patterns could simplify this solution?');
+        prompts.push('How might this solution evolve or need to adapt in the future?');
+        break;
+        
+      case 'informational':
+        prompts.push("What deeper principles connect the information you've gathered?");
+        prompts.push('What context or background would make this information more meaningful?');
+        break;
+    }
+    
+    return prompts.slice(0, 3); // Return top 3 prompts
   }
 } 

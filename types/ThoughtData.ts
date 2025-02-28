@@ -1,3 +1,6 @@
+// Import the intelligence maximization interfaces
+import { IntelligenceMaximizationRecommendations } from '../analytics/intelligenceMaximizationModule.js';
+
 export interface ThoughtData {
   thought: string;
   thoughtNumber: number;
@@ -38,4 +41,7 @@ export interface ThoughtData {
   promptRelevance?: Record<string, number>; // Relevance to different prompt aspects
   driftWarning?: string; // Warning if thought drifts from prompt
   suggestedCorrections?: string[]; // Suggestions to realign with prompt
+  
+  // Intelligence maximization properties
+  intelligenceRecommendations?: IntelligenceMaximizationRecommendations;
 } 
