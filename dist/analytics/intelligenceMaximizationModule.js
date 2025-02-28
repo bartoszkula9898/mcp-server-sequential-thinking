@@ -10,7 +10,7 @@ export class IntelligenceMaximizationModule {
      * @param phase The current thinking phase
      * @returns Intelligence maximization recommendations
      */
-    generateRecommendations(promptMetadata, currentThoughtNumber, totalThoughts, phase) {
+    generateRecommendations(promptMetadata, currentThoughtNumber, totalThoughts, phase, previousThoughts) {
         // Generate strategy recommendations
         const strategies = this.recommendStrategies(promptMetadata, currentThoughtNumber, totalThoughts, phase);
         // Recommend reasoning types
@@ -28,6 +28,12 @@ export class IntelligenceMaximizationModule {
         const metacognitiveStrategies = this.recommendMetacognitiveStrategies(promptMetadata, currentThoughtNumber, totalThoughts);
         const adaptiveSuggestions = this.generateAdaptiveSuggestions(promptMetadata, currentThoughtNumber, totalThoughts, phase);
         const insightGenerationPrompts = this.generateInsightPrompts(promptMetadata, phase);
+        // New adaptive learning recommendations
+        const adaptiveLearningRecommendations = this.generateAdaptiveLearningRecommendations(promptMetadata, currentThoughtNumber, totalThoughts);
+        // Optional thought pattern analysis
+        const thoughtPatternAnalysis = previousThoughts && previousThoughts.length > 0
+            ? this.analyzeThoughtPatterns(previousThoughts, promptMetadata)
+            : undefined;
         return {
             strategies,
             reasoningTypes,
@@ -38,7 +44,9 @@ export class IntelligenceMaximizationModule {
             cognitiveBiases,
             metacognitiveStrategies,
             adaptiveSuggestions,
-            insightGenerationPrompts
+            insightGenerationPrompts,
+            adaptiveLearningRecommendations,
+            thoughtPatternAnalysis
         };
     }
     /**
@@ -936,18 +944,16 @@ export class IntelligenceMaximizationModule {
                     prompts.push('What would a completely different planning approach look like?');
                     break;
                 case 'Analysis':
-                    prompts.push('What patterns or anomalies in the data haven', t, been, explained, yet ? ');
-                        :
-                    , prompts.push('What would change if a key assumption in your analysis was incorrect?'));
+                    prompts.push("What patterns or anomalies in the data haven't been explained yet?");
+                    prompts.push('What would change if a key assumption in your analysis was incorrect?');
                     break;
                 case 'Execution':
                     prompts.push('What elegant simplifications could make this solution more robust?');
                     prompts.push('What aspects of the implementation might create unexpected effects?');
                     break;
                 case 'Verification':
-                    prompts.push('What perspectives or criteria haven', t, been, considered in verification ? ');
-                        :
-                    , prompts.push('What would be the most surprising way this solution could fail?'));
+                    prompts.push("What perspectives or criteria haven't been considered in verification?");
+                    prompts.push('What would be the most surprising way this solution could fail?');
                     break;
             }
         }
@@ -975,5 +981,481 @@ export class IntelligenceMaximizationModule {
                 break;
         }
         return prompts.slice(0, 3); // Return top 3 prompts
+    }
+    /**
+     * Generates adaptive learning recommendations based on prompt and progress
+     */
+    generateAdaptiveLearningRecommendations(promptMetadata, currentThoughtNumber, totalThoughts) {
+        const recommendations = [];
+        const progress = currentThoughtNumber / totalThoughts;
+        // Identify learning areas based on prompt domains
+        promptMetadata.domains.forEach(domain => {
+            // Generate domain-specific learning recommendations
+            const learningRec = this.generateDomainLearningRecommendation(domain, promptMetadata.complexity);
+            if (learningRec) {
+                recommendations.push(learningRec);
+            }
+        });
+        // Add task-specific learning recommendations
+        const taskRec = this.generateTaskLearningRecommendation(promptMetadata.taskType, progress);
+        if (taskRec) {
+            recommendations.push(taskRec);
+        }
+        // Add complexity-based learning recommendations
+        if (promptMetadata.complexity === 'complex') {
+            recommendations.push({
+                learningArea: 'Complex Problem Decomposition',
+                currentLevel: 'intermediate',
+                recommendedResources: [
+                    'Breaking down complex problems into manageable components',
+                    'Identifying dependencies between sub-problems',
+                    'Tracking progress across multiple problem dimensions'
+                ],
+                expectedBenefits: [
+                    'More systematic approach to complex problems',
+                    'Better organization of thoughts and solutions',
+                    'Reduced cognitive load through structured decomposition'
+                ],
+                relevanceToPrompt: 9
+            });
+        }
+        return recommendations.slice(0, 2); // Return top 2 recommendations
+    }
+    /**
+     * Generates domain-specific learning recommendations
+     */
+    generateDomainLearningRecommendation(domain, complexity) {
+        // Domain-specific learning recommendations
+        const domainRecommendations = {
+            'programming': {
+                learningArea: 'Programming Patterns',
+                currentLevel: complexity === 'simple' ? 'beginner' :
+                    complexity === 'medium' ? 'intermediate' : 'advanced',
+                recommendedResources: [
+                    'Design patterns for maintainable code',
+                    'Testing strategies for robust software',
+                    'Performance optimization techniques'
+                ],
+                expectedBenefits: [
+                    'More elegant and maintainable solutions',
+                    'Fewer bugs and edge cases',
+                    'Better performance characteristics'
+                ],
+                relevanceToPrompt: 8
+            },
+            'math': {
+                learningArea: 'Mathematical Reasoning',
+                currentLevel: complexity === 'simple' ? 'beginner' :
+                    complexity === 'medium' ? 'intermediate' : 'advanced',
+                recommendedResources: [
+                    'Formal proof techniques',
+                    'Mathematical modeling approaches',
+                    'Numerical analysis methods'
+                ],
+                expectedBenefits: [
+                    'More rigorous analytical thinking',
+                    'Better quantitative problem solving',
+                    'Improved ability to formalize problems'
+                ],
+                relevanceToPrompt: 8
+            },
+            'business': {
+                learningArea: 'Strategic Business Analysis',
+                currentLevel: complexity === 'simple' ? 'beginner' :
+                    complexity === 'medium' ? 'intermediate' : 'advanced',
+                recommendedResources: [
+                    'Competitive analysis frameworks',
+                    'Market sizing and segmentation',
+                    'Business model innovation'
+                ],
+                expectedBenefits: [
+                    'More comprehensive business analysis',
+                    'Better strategic recommendations',
+                    'Improved market understanding'
+                ],
+                relevanceToPrompt: 8
+            },
+            'writing': {
+                learningArea: 'Effective Communication',
+                currentLevel: complexity === 'simple' ? 'beginner' :
+                    complexity === 'medium' ? 'intermediate' : 'advanced',
+                recommendedResources: [
+                    'Structured argumentation techniques',
+                    'Narrative development methods',
+                    'Audience-centered writing'
+                ],
+                expectedBenefits: [
+                    'More persuasive communication',
+                    'Better organized content',
+                    'Improved engagement with readers'
+                ],
+                relevanceToPrompt: 8
+            }
+        };
+        // Find matching domain or closest match
+        for (const [key, recommendation] of Object.entries(domainRecommendations)) {
+            if (domain.toLowerCase().includes(key) || key.includes(domain.toLowerCase())) {
+                return recommendation;
+            }
+        }
+        return null;
+    }
+    /**
+     * Generates task-specific learning recommendations
+     */
+    generateTaskLearningRecommendation(taskType, progress) {
+        // Task-specific learning recommendations
+        const taskRecommendations = {
+            'creative': {
+                learningArea: 'Creative Problem Solving',
+                currentLevel: 'intermediate',
+                recommendedResources: [
+                    'Lateral thinking techniques',
+                    'Constraint relaxation methods',
+                    'Analogical reasoning approaches'
+                ],
+                expectedBenefits: [
+                    'More innovative solutions',
+                    'Breaking out of conventional thinking patterns',
+                    'Finding unexpected connections between ideas'
+                ],
+                relevanceToPrompt: 9
+            },
+            'analytical': {
+                learningArea: 'Analytical Reasoning',
+                currentLevel: 'intermediate',
+                recommendedResources: [
+                    'Hypothesis testing frameworks',
+                    'Causal analysis techniques',
+                    'Evidence evaluation methods'
+                ],
+                expectedBenefits: [
+                    'More rigorous analysis',
+                    'Better identification of root causes',
+                    'Improved ability to evaluate competing explanations'
+                ],
+                relevanceToPrompt: 9
+            },
+            'technical': {
+                learningArea: 'Technical Problem Solving',
+                currentLevel: 'intermediate',
+                recommendedResources: [
+                    'Systems thinking approaches',
+                    'Technical requirement analysis',
+                    'Implementation planning techniques'
+                ],
+                expectedBenefits: [
+                    'More robust technical solutions',
+                    'Better anticipation of edge cases',
+                    'Improved implementation planning'
+                ],
+                relevanceToPrompt: 9
+            }
+        };
+        // Return task-specific recommendation if available
+        return taskRecommendations[taskType] || null;
+    }
+    /**
+     * Analyzes thought patterns across multiple thoughts
+     * @param thoughts Array of previous thoughts
+     * @param promptMetadata The prompt metadata for context
+     * @returns Analysis of thought patterns
+     */
+    analyzeThoughtPatterns(thoughts, promptMetadata) {
+        // Skip if not enough thoughts
+        if (thoughts.length < 3) {
+            return {
+                dominantPatterns: [],
+                suggestedPatternShifts: [],
+                thinkingDiversity: 5,
+                patternEvolution: 'stable'
+            };
+        }
+        // Analyze phase distribution
+        const phaseDistribution = this.analyzePhaseDistribution(thoughts);
+        // Analyze tool usage patterns
+        const toolUsagePatterns = this.analyzeToolUsagePatterns(thoughts);
+        // Analyze classification patterns
+        const classificationPatterns = this.analyzeClassificationPatterns(thoughts);
+        // Identify dominant patterns
+        const dominantPatterns = this.identifyDominantPatterns(phaseDistribution, toolUsagePatterns, classificationPatterns, promptMetadata);
+        // Calculate thinking diversity
+        const thinkingDiversity = this.calculateThinkingDiversity(phaseDistribution, toolUsagePatterns, classificationPatterns);
+        // Determine pattern evolution
+        const patternEvolution = this.determinePatternEvolution(thoughts);
+        // Generate suggested pattern shifts
+        const suggestedPatternShifts = this.generatePatternShifts(dominantPatterns, promptMetadata, thinkingDiversity);
+        return {
+            dominantPatterns,
+            suggestedPatternShifts,
+            thinkingDiversity,
+            patternEvolution
+        };
+    }
+    /**
+     * Analyzes the distribution of thinking phases
+     */
+    analyzePhaseDistribution(thoughts) {
+        const distribution = {
+            'Planning': 0,
+            'Analysis': 0,
+            'Execution': 0,
+            'Verification': 0
+        };
+        // Count occurrences of each phase
+        thoughts.forEach(thought => {
+            if (thought.phase) {
+                distribution[thought.phase]++;
+            }
+        });
+        // Convert to percentages
+        const total = thoughts.length;
+        Object.keys(distribution).forEach(phase => {
+            distribution[phase] = distribution[phase] / total;
+        });
+        return distribution;
+    }
+    /**
+     * Analyzes tool usage patterns
+     */
+    analyzeToolUsagePatterns(thoughts) {
+        const toolCounts = {};
+        // Count tool usage
+        thoughts.forEach(thought => {
+            if (thought.toolsUsed && thought.toolsUsed.length > 0) {
+                thought.toolsUsed.forEach(tool => {
+                    toolCounts[tool] = (toolCounts[tool] || 0) + 1;
+                });
+            }
+        });
+        // Convert to frequency array
+        const total = thoughts.length;
+        return Object.entries(toolCounts)
+            .map(([tool, count]) => ({
+            tool,
+            frequency: count / total
+        }))
+            .sort((a, b) => b.frequency - a.frequency);
+    }
+    /**
+     * Analyzes classification patterns
+     */
+    analyzeClassificationPatterns(thoughts) {
+        const classificationCounts = {};
+        // Count classifications
+        thoughts.forEach(thought => {
+            if (thought.classification) {
+                classificationCounts[thought.classification] =
+                    (classificationCounts[thought.classification] || 0) + 1;
+            }
+        });
+        // Convert to frequency array
+        const total = thoughts.filter(t => t.classification).length || 1;
+        return Object.entries(classificationCounts)
+            .map(([classification, count]) => ({
+            classification,
+            frequency: count / total
+        }))
+            .sort((a, b) => b.frequency - a.frequency);
+    }
+    /**
+     * Identifies dominant thought patterns
+     */
+    identifyDominantPatterns(phaseDistribution, toolUsagePatterns, classificationPatterns, promptMetadata) {
+        const patterns = [];
+        // Check for phase-based patterns
+        if (phaseDistribution['Planning'] > 0.4) {
+            patterns.push({
+                patternName: 'Planning-Heavy',
+                description: 'Significant focus on planning phase',
+                frequency: phaseDistribution['Planning'],
+                impact: promptMetadata.complexity === 'complex' ? 'positive' : 'negative'
+            });
+        }
+        if (phaseDistribution['Execution'] > 0.6) {
+            patterns.push({
+                patternName: 'Execution-Focused',
+                description: 'Strong emphasis on execution with less planning/verification',
+                frequency: phaseDistribution['Execution'],
+                impact: promptMetadata.complexity === 'simple' ? 'positive' : 'negative'
+            });
+        }
+        if (phaseDistribution['Verification'] < 0.1) {
+            patterns.push({
+                patternName: 'Verification-Light',
+                description: 'Limited verification of solutions',
+                frequency: 1 - phaseDistribution['Verification'],
+                impact: 'negative'
+            });
+        }
+        // Check for tool-based patterns
+        if (toolUsagePatterns.length === 0) {
+            patterns.push({
+                patternName: 'Tool-Avoidant',
+                description: 'Minimal use of available tools',
+                frequency: 0.8,
+                impact: 'negative'
+            });
+        }
+        else if (toolUsagePatterns[0].frequency > 0.7) {
+            patterns.push({
+                patternName: 'Single-Tool-Dominant',
+                description: `Heavy reliance on ${toolUsagePatterns[0].tool}`,
+                frequency: toolUsagePatterns[0].frequency,
+                impact: 'neutral'
+            });
+        }
+        // Check for classification-based patterns
+        if (classificationPatterns.length > 0 && classificationPatterns[0].frequency > 0.6) {
+            const dominantClassification = classificationPatterns[0].classification;
+            patterns.push({
+                patternName: `${dominantClassification}-Dominant`,
+                description: `Thinking primarily classified as ${dominantClassification}`,
+                frequency: classificationPatterns[0].frequency,
+                impact: this.evaluateClassificationImpact(dominantClassification, promptMetadata)
+            });
+        }
+        return patterns;
+    }
+    /**
+     * Evaluates the impact of a dominant classification
+     */
+    evaluateClassificationImpact(classification, promptMetadata) {
+        // Task-specific classification impact
+        const positiveClassifications = {
+            'creative': ['hypothesis', 'question'],
+            'analytical': ['observation', 'conclusion'],
+            'technical': ['solution'],
+            'informational': ['observation']
+        };
+        // Check if this classification is positive for this task type
+        if (positiveClassifications[promptMetadata.taskType] &&
+            positiveClassifications[promptMetadata.taskType].includes(classification)) {
+            return 'positive';
+        }
+        // Default impact based on diversity
+        return 'neutral';
+    }
+    /**
+     * Calculates thinking diversity score
+     */
+    calculateThinkingDiversity(phaseDistribution, toolUsagePatterns, classificationPatterns) {
+        let diversityScore = 5; // Start with neutral score
+        // Phase diversity
+        const phaseValues = Object.values(phaseDistribution);
+        const phaseEntropy = this.calculateEntropy(phaseValues);
+        diversityScore += phaseEntropy * 2; // 0-2 points
+        // Tool diversity
+        const toolFrequencies = toolUsagePatterns.map(p => p.frequency);
+        if (toolFrequencies.length > 0) {
+            const toolEntropy = this.calculateEntropy(toolFrequencies);
+            diversityScore += toolEntropy * 1.5; // 0-1.5 points
+        }
+        // Classification diversity
+        const classificationFrequencies = classificationPatterns.map(p => p.frequency);
+        if (classificationFrequencies.length > 0) {
+            const classificationEntropy = this.calculateEntropy(classificationFrequencies);
+            diversityScore += classificationEntropy * 1.5; // 0-1.5 points
+        }
+        // Cap at 0-10
+        return Math.max(0, Math.min(10, diversityScore));
+    }
+    /**
+     * Calculates entropy as a measure of diversity
+     */
+    calculateEntropy(probabilities) {
+        // Filter out zeros and normalize
+        const validProbs = probabilities.filter(p => p > 0);
+        const sum = validProbs.reduce((a, b) => a + b, 0);
+        const normalizedProbs = validProbs.map(p => p / sum);
+        // Calculate entropy
+        const entropy = -normalizedProbs.reduce((sum, p) => sum + p * Math.log2(p), 0);
+        // Normalize to 0-1 range (max entropy for n values is log2(n))
+        const maxEntropy = Math.log2(normalizedProbs.length || 1);
+        return maxEntropy === 0 ? 0 : entropy / maxEntropy;
+    }
+    /**
+     * Determines how thought patterns are evolving
+     */
+    determinePatternEvolution(thoughts) {
+        if (thoughts.length < 5)
+            return 'stable';
+        // Split into first and second half
+        const midpoint = Math.floor(thoughts.length / 2);
+        const firstHalf = thoughts.slice(0, midpoint);
+        const secondHalf = thoughts.slice(midpoint);
+        // Calculate diversity for each half
+        const firstHalfDiversity = this.calculateThinkingDiversity(this.analyzePhaseDistribution(firstHalf), this.analyzeToolUsagePatterns(firstHalf), this.analyzeClassificationPatterns(firstHalf));
+        const secondHalfDiversity = this.calculateThinkingDiversity(this.analyzePhaseDistribution(secondHalf), this.analyzeToolUsagePatterns(secondHalf), this.analyzeClassificationPatterns(secondHalf));
+        // Determine trend
+        const difference = secondHalfDiversity - firstHalfDiversity;
+        if (difference > 1)
+            return 'improving';
+        if (difference < -1)
+            return 'narrowing';
+        return 'stable';
+    }
+    /**
+     * Generates suggested pattern shifts
+     */
+    generatePatternShifts(dominantPatterns, promptMetadata, thinkingDiversity) {
+        const shifts = [];
+        // Generate shifts for negative patterns
+        dominantPatterns
+            .filter(pattern => pattern.impact === 'negative')
+            .forEach(pattern => {
+            if (pattern.patternName === 'Planning-Heavy') {
+                shifts.push({
+                    from: 'Excessive planning',
+                    to: 'Balanced execution and verification',
+                    benefit: 'More concrete progress and validation of ideas'
+                });
+            }
+            if (pattern.patternName === 'Execution-Focused' && promptMetadata.complexity !== 'simple') {
+                shifts.push({
+                    from: 'Immediate execution',
+                    to: 'More thorough planning and analysis',
+                    benefit: 'Better structured approach for complex problems'
+                });
+            }
+            if (pattern.patternName === 'Verification-Light') {
+                shifts.push({
+                    from: 'Limited verification',
+                    to: 'Systematic solution testing',
+                    benefit: 'Higher quality, more robust solutions'
+                });
+            }
+            if (pattern.patternName === 'Tool-Avoidant') {
+                shifts.push({
+                    from: 'Manual reasoning only',
+                    to: 'Strategic tool utilization',
+                    benefit: 'Enhanced capabilities and efficiency'
+                });
+            }
+        });
+        // Add diversity-based shifts
+        if (thinkingDiversity < 5) {
+            shifts.push({
+                from: 'Narrow thinking patterns',
+                to: 'Diverse reasoning approaches',
+                benefit: 'More creative and comprehensive solutions'
+            });
+            // Task-specific diversity recommendations
+            if (promptMetadata.taskType === 'creative') {
+                shifts.push({
+                    from: 'Conventional thinking',
+                    to: 'Exploratory and divergent thinking',
+                    benefit: 'More innovative and original ideas'
+                });
+            }
+            else if (promptMetadata.taskType === 'analytical') {
+                shifts.push({
+                    from: 'Single analytical framework',
+                    to: 'Multiple analytical perspectives',
+                    benefit: 'More robust and nuanced analysis'
+                });
+            }
+        }
+        return shifts;
     }
 }
